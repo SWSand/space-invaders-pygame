@@ -38,41 +38,119 @@ Just like every module up to this point. There are pre-built methods that come w
 Unfortunately, this isn't a Pygame lesson. It is an **Object Oriented Programming and Classes** lecture so we won't dwell too much on Pygames library of methods. All the legwork has been done for you and all you need to do is use the boiler plates provided for you. A small description has been added to familiarize you with the module we will be using. Pygame will simply be a tool for us to better visualize classes and objects
 
 
+Pygame method **CHEATSHEET**
+
+
+ 	# GAME WINDOW
+
+	pygame.init() : Initializes the pygame modules in the code
+
+  	pyame.display.set_mode((size_x, size_y)) : this creates the window and sets its size. Assign this to a variable that will hold your "screen"
+
+   	#IMAGES
+
+   	pygame.image.load("my_image.jpg") : Loads an image. You can assign this to an image variable
+
+	screen.blit(my_image, (my_image_x, my_image_y)) : Adds the image on to your game screen at the location given
+
+	my_image.get_rect().size[1] : when called on an image variable and assigned to a variable ex: image_heigh,  will return the height of an image
+
+	pygame.transform.flip(my_image, False, True) : used on an image, will flip it on its x axis
+
+	object_one.colliderect(object_two) : detects if one object/rect collides with another
+
+ 	#EVENTS
+
+  	events = pygame.event.get() : grabs an event and assigns it to a variable
+
+   	#WRTING TO SCREEN
+	# Write size 36 turquoise text to the screen
+	colour = (0, 255, 255)
+	font = pygame.font.Font(None, 36)
+	location = (300, 10)
+	screen.blit(font.render(“Flippy Bird”, True,
+	colour), location)
+
+
+	#-----------------------------------------------------
+ 	# CHECKS TO SEE IF THE EVENT IS A PRESSED OR RELEASED KEY
+   	if event[0].type == pygame.KEYDOWN:
+    		print("A key was pressed!")
+      	elif events[0].type == pygame.KEYUP:
+       		print("A key was released!")
+
+  	#-------------------------------------------------
+   	# CHECKS TO SEE WHICH KEY WAS PRESSED
+	if events[0].key == pygame.K_UP:
+		print("The up arrow key was pressed!")
+	elif events[0].key == pygame.K_DOWN:
+		print("The down arrow key was pressed!")
+	elif events[0].key == pygame.K_q:
+		print("The letter q was pressed!")
+  	
+	#-----------------------------------------------
+ 	#PYGAME EVENTS 
+	pygame.QUIT
+	pygame.ACTIVEEVENT
+	pygame.KEYDOWN
+	pygame.KEYUP
+	pygame.MOUSEMOTION
+	pygame.MOUSEBUTTONUP
+	pygame.MOUSEBUTTONDOWN
+
+ 	#------------------------------------------------
+  	# CLOSE THE WINDOW
+
+   
+	# Import the system module
+	import sys
+	# Close the window and exit
+	pygame.display.quit()
+	sys.exit()
+
+ 	#-------------------------------------------------
+  	#COMMON KEY CODES IN PYGAME
+	pygame.K_SPACE : spacebar
+	pygame.K_a/w/s/d : a/w/s/d
+	pygame.K_UP/DOWN/LEFT/RIGHT : up arrow/down arrow/left arrow/right arrow
+   	
+
+
 Below, you will find a Boiler Plate template that will open up a BASIC pygame window so that we can begin working. Everything in this code is the necessary foundation for all games using the pygame module. This will be our skeleton for our program.
 Begin by creating a directory in which we will hold our game. Within this directory we will create our main.py which will hold our boiler plate. On top of containing our main.py we will be creating other files that will be holding our classes to keep everything seperated and organized. 
 
 	# Example file showing a basic pygame "game loop"
  
 	import pygame
+	import sys
 	
-	# pygame setup. This will initialize the module for you. Similar to initializing our class and calling an Init method
-	pygame.init()
- 
- 	# declare a variable named screen and initialize it with our desired width and height
-	screen = pygame.display.set_mode((1280, 720))
+	class Game:
 
- 	#Initiate a clock that keeps track of our framerate
-	clock = pygame.time.Clock()
-	running = True
-	
-	while running:
-	    # poll for events
-	    # pygame.QUIT event means the user clicked X to close your window
-	    for event in pygame.event.get():
-	        if event.type == pygame.QUIT:
-	            running = False
+	    def __init__(self):
+	        pygame.init()
+	        self.screen = pygame.display.set_mode((800,800))
+	        pygame.display.set_caption('OOP')
+	        self.clock = pygame.time.Clock()
 
-    # fill the screen with a color to wipe away anything from last frame
-    screen.fill("black")
+	    def run(self):
+	        while True:
+	            
+	     	    #Every time it loops, it will check if we decided to exit the game or not
+	            for event in pygame.event.get():
+	                if event.type == pygame.QUIT:
+	                    pygame.quit()
+	                    sys.exit()
 
-    # RENDER YOUR GAME HERE
+			# <---- WITHIN THIS SPACE WE CAN ADD CODE FOR OUR GAME TO CONDUCT ---->
 
-    # flip() the display to put your work on screen
-    pygame.display.flip()
+       
+		     
+		    #This method is a form of a refresh, and updates our screen
+	            pygame.display.update()
+	            self.clock.tick(60)
 
-    clock.tick(60)  # limits FPS to 60
-
-	pygame.quit()
+	my_game = Game()
+	my_game.run()
 
 Now that we have a window open we can begin working.
 
