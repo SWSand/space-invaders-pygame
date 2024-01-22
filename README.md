@@ -157,3 +157,52 @@ Now that we have a window open we can begin working.
 **CREATING OUR CHARACTER**
 
 After creating your main.py file with our template, create a seperate file and name it **hero.py**
+
+We will now isolate our Hero code by creating our class in its individual file. For our Hero to properly work we want to ensure he is able to take as arguments an image, and its x and y coordinates. 
+
+	import pygame
+
+	class SpaceShip:
+
+	    def __init__(self, image, x, y):
+	        self.image = pygame.image.load(image)
+	        self.x = x
+	        self.y = y
+
+
+After we create our SpaceShip we need to code the functionality to allow it to appear in our screen. We can either do this in our game loop or we can just give our class the method for it. In our example we will create the method within our class
+
+	    def draw(self, screen):
+	        screen.blit(self.image, (self.x, self.y))
+
+
+Now that our blueprint ( or CLASS ) for our SpaceShip / Hero has been created we can draw it on our screen: Remember, the way our pixels work on our screen is from top left to bottom right. Therefore if we were to assign our x and y axis as 0,0 our image will appear at the top left corner of our screen. As we increase our x axis it will shift to our right, and going negative will shift it to the left outside of our screen. For the Y axis as we increase the Y axis it will move down our screen and as we go into the negatives it will move up away from our screen. Below is the Code Snippet for what our Spaceship class should look like.
+
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode((800,800))
+        pygame.display.set_caption('OOP')
+        self.clock = pygame.time.Clock()
+
+        # Create our hero ship
+        self._hero = SpaceShip("DurrrSpaceShip.png", 350, 350)
+
+    def run(self):
+        while True:
+            #This initiates our game loop. Every time it runs it will go through all these checks
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            #we call the .draw method creating in our hero class and pass it the screen data member to draw it in our screen
+            self._hero.draw(self.screen)
+
+        
+
+            pygame.display.update()
+            self.clock.tick(60)
+
+
+
+ 		
