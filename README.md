@@ -51,6 +51,10 @@ Pygame method **CHEATSHEET**
 
    	pygame.image.load("my_image.jpg") : Loads an image. You can assign this to an image variable
 
+     	pygame.Surface((x,y)) : creates a surface that isnt our screen for us to add our hero or enemies on to
+
+      	surface.fill("color") : fills in our surface to make it visible. default color is black
+
 	screen.blit(my_image, (my_image_x, my_image_y)) : Adds the image on to your game screen at the location given
 
 	my_image.get_rect().size[1] : when called on an image variable and assigned to a variable ex: image_heigh,  will return the height of an image
@@ -97,6 +101,8 @@ Pygame method **CHEATSHEET**
 	pygame.MOUSEMOTION
 	pygame.MOUSEBUTTONUP
 	pygame.MOUSEBUTTONDOWN
+ 	pygame.mouse.get_pos() : returns tuple relative to the 0,0 location
+  	pygame.key.get_pressed() : grabs a dictionary of the status of all keys
 
  	#------------------------------------------------
   	# CLOSE THE WINDOW
@@ -154,6 +160,19 @@ Begin by creating a directory in which we will hold our game. Within this direct
 
 Now that we have a window open we can begin working.
 
+First thing we will do is create a Surface that we can work on. Keep in mind that the Display screen is not the same as our working Surface. to create a surface you require the "pygame.Surface command. we will begin by declaring a data member which will hold and initiate our Surface and we will give it the OuterSpace.png file
+
+ 	# declare your surface in the init method
+	self.space_surface = pygame.Surface((800,800))
+
+
+
+	# WITHIN, the Run method inside of our game loop we can to use screen.blit to add the surface to our display, afterwards we can add other items on top of this surface
+ 
+ 	self.screen.blit(self.space_surface, (0,0))
+        self.space_surface.blit(pygame.image.load("OuterSpace.png"),(0,0))
+
+
 **CREATING OUR CHARACTER**
 
 After creating your main.py file with our template, create a seperate file and name it **hero.py**
@@ -178,31 +197,69 @@ After we create our SpaceShip we need to code the functionality to allow it to a
 
 Now that our blueprint ( or CLASS ) for our SpaceShip / Hero has been created we can draw it on our screen: Remember, the way our pixels work on our screen is from top left to bottom right. Therefore if we were to assign our x and y axis as 0,0 our image will appear at the top left corner of our screen. As we increase our x axis it will shift to our right, and going negative will shift it to the left outside of our screen. For the Y axis as we increase the Y axis it will move down our screen and as we go into the negatives it will move up away from our screen. Below is the Code Snippet for what our Spaceship class should look like.
 
+	#DONT FORGET TO IMPORT OUR SHIP CLASS!!!
+
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode((800,800))
         pygame.display.set_caption('OOP')
         self.clock = pygame.time.Clock()
 
+ 	#We create our space surface
+        self.space_surface = pygame.Surface((800,800))
+
         # Create our hero ship
-        self._hero = SpaceShip("DurrrSpaceShip.png", 350, 350)
+        self._hero = SpaceShip("DurrrSpaceShip.png", 360, 700)
 
     def run(self):
         while True:
+
             #This initiates our game loop. Every time it runs it will go through all these checks
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-            #we call the .draw method creating in our hero class and pass it the screen data member to draw it in our screen
-            self._hero.draw(self.screen)
 
-        
+            self.screen.blit(self.space_surface, (0,0))
+            self.space_surface.blit(pygame.image.load("OuterSpace.png"),(0,0))
 
-            pygame.display.update()
-            self.clock.tick(60)
-
+            
+            self._hero.draw(self.space_surface)
 
 
+If done corretly, when our main.py runs it should open up a game window with our SpaceShip dead center and a cool looking space background!!
+
+Now all this is cool and all but our ship doesnt do anything just yet, so lets add some functionality. We would like for our spaceship to be able to move left and right to allow it to aim around around screen. To do this we need to be able to capture certain input like either using the arrow keys on our keyboard of the w,a,s,d.
+
+First thing first we can to create a method that is unique only to our SpaceShip that will allow it to move. This method will take in a Str argument which could be "a","d","w","s" and change our x and y coordinates. Think of it as a setter method:
+
+    def move(self, direction):
+        if direction == "a":
+            if self._x >= 20:
+                self._x -= 5
+        elif direction == "d":
+            if self._x <= 700:
+                self._x += 5
+        elif direction == "w":
+            if self._y >=  300:
+                self._y -= 5
+        elif direction == "s":
+            if self._y <= 700:
+                self._y += 5
+
+Once our SpaceShip has a method to move we can begin capturing the necessary Events for it within our Game Loop;
+
+	# The key.get_pressed() method returns a dictionary of status of all keys
+	# which we can access to see if theyre pressed or not. Depending on their status
+	# we want to move left or move right
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_a]:
+                self.hero.move("a")
+            if keys[pygame.K_d]:
+                self.hero.move("d")
+            if keys[pygame.K_w]:
+                self.hero.move("w")
+            if keys[pygame.K_s]:
+                self.hero.move("s")
  		
