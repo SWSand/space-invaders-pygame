@@ -183,12 +183,12 @@ We will now isolate our Hero code by creating our class in its individual file. 
 
 	class SpaceShip:
 	
-	    def __init__(self, image, x, y):
-		self._space_ship_surface = pygame.image.load(image)
-		self._space_ship_rect = self._space_ship_surface.get_rect(midbottom = (x, y))
-  
-	    def get_position(self):
-		return (self._space_ship_rect.x, self._space_ship_rect.y)
+		def __init__(self, image, x, y):
+			self._space_ship_surface = pygame.image.load(image)
+			self.rect = self._space_ship_surface.get_rect(midbottom = (x, y))
+		
+		def get_position(self):
+			return (self.rect.x, self.rect.y)
 
 
 After we create our SpaceShip we need to code the functionality to allow it to appear in our screen. We can either do this in our game loop or we can just give our class the method for it. In our example we will create the method within our class. We will use the surface that our image is on, and instead of hand jamming the exact coordinates of our position we can just pass our rectangle that already holds that in
@@ -238,17 +238,17 @@ First thing first we can to create a method that is unique only to our SpaceShip
 
     def move(self, direction):
         if direction == "a":
-            if self._space_ship_rect.x >= 20:
-                self._space_ship_rect.x -= 5
+            if self.rect.x >= 20:
+                self.rect.x -= 5
         elif direction == "d":
-            if self._space_ship_rect.x <= 700:
-                self._space_ship_rect.x += 5
+            if self.rect.x <= 700:
+                self.rect.x += 5
         elif direction == "w":
-            if self._space_ship_rect.y >=  300:
-                self._space_ship_rect.y -= 5
+            if self.rect.y >=  300:
+                self.rect.y -= 5
         elif direction == "s":
-            if self._space_ship_rect.y <= 700:
-                self._space_ship_rect.y += 5
+            if self.rect.y <= 700:
+                self.rect.y += 5
 
 Once our SpaceShip has a method to move we can begin capturing the necessary Events for it within our Game Loop;
 
@@ -339,3 +339,99 @@ But what happens to the bullet after the screen? Well nothing. It keeps moving o
 		self.rect.y -= 10
 		if self.rect.y == 10:
 			self.kill()
+
+Up to this point in our code we have a working SpaceShip with the ability to defend itself if needed, but NO hero story is ever complete with having an enemy to quarrel with so next we are going to work on our Enemy.py. Create a seperate file were we can create our Alien class. Very similar to our Bullet class, we are going to treat the enemies as a subclass of the sprite class so therefore it will require to inherit from "pygame.sprite.Sprite" and have it initialized within the init method
+
+	import pygame
+ 	import random
+
+	class Alien(pygame.sprite.Sprite):
+
+	def __init__(self):
+		pygame.sprite.Sprite.__init__(self)
+
+  		# we need to load our images for our 3 individual aliens and assign it into a data member
+		self.green_alien = pygame.image.load("assets/GreenAlien.png")
+		self.red_alien = pygame.image.load("assets/RedAlien.png")
+		self.yellow_alien = pygame.image.load("assets/YellowAlien.png")
+
+  		#After creating our 3 aliens we will add them to a list that we are able to search through by index randomly
+		self.spawnable_aliens = [self.yellow_alien, self.red_alien, self.green_alien]
+
+  		# utilizing the random module, we will use a random number with its .randint() method to grab a number from 
+		# 0-2 therefore randomizing which type of alien we will spawn
+		# after every instance creation
+		self.image = self.spawnable_aliens[random.randint(0,2)]
+
+  		#Finally assign it a rect to better define collision later and to better place it
+		self.rect = self.image.get_rect(center = (20,20))
+
+With the Alien class created we want to create a new Sprite Group in our Game Class to track all our Alien Objects
+
+        self.all_aliens = pygame.sprite.Group()
+
+Now how do we trigger the enemy spawning ? Well pygame provides us with the ability to create certain events using the "pygame.USEREVENT". Within our Game class in our init method we want to create a timer
+
+	# create a data member for your timer and add + 1 after pygame.USEREVENT to let it know you are creating an addional one
+	self.enemy_spawn_timer = pygame.USEREVENT + 1
+
+ 	#now to set the time using the method below that takes two arguments: the timer to be set, and the time in MILLIseconds
+  	pygame.time.set_timer(self.enemy_spawn_timer, 2000)
+
+After creating and setting up our timer we can actually check this event wihin our game loop in the run method
+
+	if event.type == self.enemy_spawn_timer:
+	    alien_object = Alien()
+	    self.all_aliens.add(alien_object)
+And finally draw your alien like everything else
+
+	self.hero.draw(self.space_surface)
+	
+	self.all_aliens.draw(self.space_surface)
+	
+	self.all_bullets.update()
+	self.all_bullets.draw(self.space_surface)     
+
+This is cool and all but no one likes a stationary target. We enjoy the thrill of the hunt so lets give these bad boys some movement. Essentially we want to instantiate our Alien Objects at the top left of our screen and go from left to right top to bottom until reaching our hero like the Classic Space Invaders Arcade game that most of us grew up with. To add that we need a way to update them so we will use our inhertid metho update() and override it with some unique code only to our alien
+
+
+First: We want to create a data member within the Alien Init class that we can track to see if hes moving left or moving right
+
+	self.going_right == True
+
+
+Afterwards we can use that data member within our update method to check what way we are moving and depending what way that is we will adjust our x or y coordinate accordingly
+
+	def update(self):
+		if self.going_right == True:
+		    self.rect.x += 5
+		    if self.rect.x == 760:
+			self.rect.y += 50
+			self.going_right = False
+		else:
+		    self.rect.x -= 5
+		    if self.rect.x == 0:
+			self.going_right = True
+			self.rect.y += 50
+
+Finally we can draw our aliens and update them in our game loop 
+
+	self.all_aliens.draw(self.space_surface)
+	self.all_aliens.update()
+
+A movable space ship with firing capabilities and a dangerous foe. It feels like we are almost at the end but the key core concept isnt there. Our objects exist but they can't interact with each other. Lets fix that
+
+A unique method to the sprite class allows for a group of sprites to check if theyve collided with another group of sprites and thats the "pygame.spritecollide(self, sprite_group_to_compare_to, Boolean=(to destroy or not)
+
+We want to see if our bullets actually hit our targets or not. To do that, within our Bullet class we are going to tweak our update code only slightly
+
+ 	#add a new parameter to our update class, which will be the group we will compare it agaisnt to
+	def update(self, alien_group):
+		self.rect.y -= 10
+
+		# we add this line checking if our alien group collided with our bullet and if so, 
+		# adding true to the third argument will self.kill that object
+		pygame.sprite.spritecollide(self, alien_group, True)
+		if self.rect.y == -50:
+		    self.kill()
+	
