@@ -169,30 +169,32 @@ First thing we will do is create a Surface that we can work on. Keep in mind tha
 
 	# WITHIN, the Run method inside of our game loop we can to use screen.blit to add the surface to our display, afterwards we can add other items on top of this surface
  
- 	self.screen.blit(self.space_surface, (0,0))
-        self.space_surface.blit(pygame.image.load("OuterSpace.png"),(0,0))
+	self.screen.blit(self.space_surface, (0,0))
+	self.space_surface.blit(pygame.image.load("OuterSpace.png"),(0,0))
 
 
 **CREATING OUR CHARACTER**
 
 After creating your main.py file with our template, create a seperate file and name it **hero.py**
 
-We will now isolate our Hero code by creating our class in its individual file. For our Hero to properly work we want to ensure he is able to take as arguments an image, and its x and y coordinates. 
+We will now isolate our Hero code by creating our class in its individual file. For our Hero to properly work we want to ensure he is able to take as arguments an image, and its x and y coordinates. The image will be used to declare the surface of where he will be working on. Afterwards to be able to precisely manipulate our SpaceShip and to be able to track collisions we need to surround our Hero with a "Rectangle". Think of it as an imaginary box that surrounds the perimeter of our ship. With this rectangle we can track when other objects ( that also have a rectangle around them ) touch or intersect between OUR hero's rectangle. Thats how we determine if we've been hit !
 
 	import pygame
 
 	class SpaceShip:
-
+	
 	    def __init__(self, image, x, y):
-	        self.image = pygame.image.load(image)
-	        self.x = x
-	        self.y = y
+		self._space_ship_surface = pygame.image.load(image)
+		self._space_ship_rect = self._space_ship_surface.get_rect(midbottom = (x, y))
+  
+	    def get_position(self):
+		return (self._space_ship_rect.x, self._space_ship_rect.y)
 
 
-After we create our SpaceShip we need to code the functionality to allow it to appear in our screen. We can either do this in our game loop or we can just give our class the method for it. In our example we will create the method within our class
+After we create our SpaceShip we need to code the functionality to allow it to appear in our screen. We can either do this in our game loop or we can just give our class the method for it. In our example we will create the method within our class. We will use the surface that our image is on, and instead of hand jamming the exact coordinates of our position we can just pass our rectangle that already holds that in
 
-	    def draw(self, screen):
-	        screen.blit(self.image, (self.x, self.y))
+    def draw(self, screen):
+        screen.blit(self._space_ship_surface, self._space_ship_rect)
 
 
 Now that our blueprint ( or CLASS ) for our SpaceShip / Hero has been created we can draw it on our screen: Remember, the way our pixels work on our screen is from top left to bottom right. Therefore if we were to assign our x and y axis as 0,0 our image will appear at the top left corner of our screen. As we increase our x axis it will shift to our right, and going negative will shift it to the left outside of our screen. For the Y axis as we increase the Y axis it will move down our screen and as we go into the negatives it will move up away from our screen. Below is the Code Snippet for what our Spaceship class should look like.
@@ -236,17 +238,17 @@ First thing first we can to create a method that is unique only to our SpaceShip
 
     def move(self, direction):
         if direction == "a":
-            if self._x >= 20:
-                self._x -= 5
+            if self._space_ship_rect.x >= 20:
+                self._space_ship_rect.x -= 5
         elif direction == "d":
-            if self._x <= 700:
-                self._x += 5
+            if self._space_ship_rect.x <= 700:
+                self._space_ship_rect.x += 5
         elif direction == "w":
-            if self._y >=  300:
-                self._y -= 5
+            if self._space_ship_rect.y >=  300:
+                self._space_ship_rect.y -= 5
         elif direction == "s":
-            if self._y <= 700:
-                self._y += 5
+            if self._space_ship_rect.y <= 700:
+                self._space_ship_rect.y += 5
 
 Once our SpaceShip has a method to move we can begin capturing the necessary Events for it within our Game Loop;
 
@@ -263,3 +265,77 @@ Once our SpaceShip has a method to move we can begin capturing the necessary Eve
             if keys[pygame.K_s]:
                 self.hero.move("s")
  		
+AWESOME our SpaceShip has lift off! At this point in our code we've reached modern space exploration, but its time to kick it up a notch. We need to be able to defend ourselves from any possible threat, so for that our spaceship needs to be able to shoot some form of projectile! For this exercise we wont need anything fancy. Pygame allows us to create shapes which we can use as a form of projectile. To begin you need to create a Bullet class
+
+**Bullet Class**
+
+Create a new file called Bullet.py. This new file will hold the code needed for our ammunition. In this class we are going to introduce inheritance. One of the amazing traits of Classes and Objects is the ability to be able to inherit from other class. Our bullet will have to be a special type of class, because unlike our ship, we will require multiple bullets every time we fire and we need to be able to track each instance of every bullet and update it as necessary. Luckily pygame has a built in class we can utilize and inherit from. This is called our Sprite class. Within our Bullet class we will inherit from the Sprite class specific methods that will allow us to manipulate every bullet
+
+
+	#within our class name we will add the class we will inherit from. this will be "pygame.sprite.Sprite" Think of this step as importing a module**DO NOT FORGET TO CAPITALIZE THE SECOND SPRITE**
+	class Bullet(pygame.sprite.Sprite):
+
+    def __init__(self, x, y):
+
+    	#within our init method, before we begin defining our bullet class we need to initiate the sprite class we inherit from. think of it as starting up your computer or tv
+        pygame.sprite.Sprite.__init__(self)
+	#Afterwards we can begin defining out Bullet class like normal. Only difference now is that when using our Bullet class instances we not have access to methods belonging to our Parent Class
+        self.image = pygame.Surface((10,10), pygame.SRCALPHA)
+        pygame.draw.circle(self.image, (255, 0, 0, 255), (5, 5), 5)
+        self.rect = self.image.get_rect(midbottom = (x,y))	
+
+
+ Now that our bullet class is written Import it into our main.py
+
+ Within The init method of our Game class we need to create a variable that will HOLD all our Bullet SPRITES ( Objects of Bullets )
+
+	# Thanks to the inheritance from our parent class we can use methods like the one below. 
+ 	# This creates almost like a dictionary that works specifically to objects and assigns 
+  	# it to our variable data member called all_bullets
+ 	self.all_bullets = pygame.sprite.Group()
+
+Now lets actually pull the trigger! We want to be able to shoot at a click of a button, we have already worked with our keyboard, now lets attempt to use our mouse instead. Mouse clicking is a type of event that pygame can listen for. Think of it very similar to using js on our websites and adding event listeners to our buttons
+
+	if event.type == pygame.MOUSEBUTTONDOWN:
+		## we want to know the location of where our ship is so we know where the bullet needs to be fired from
+		current_ship_location = self.hero.get_position()
+		 
+		# we create an instance of a bullet and pass it the location of our ship firing barrel, to compensate for the location / size of our ship
+		# I added some adjustments to ensure it lines up with the firing barrel
+		bullet_object = Bullet(current_ship_location[0] + 40, current_ship_location[1] + 10)
+		
+		## Now that our bullet is instantated we add it to our sprite Group
+		self.all_bullets.add(bullet_object)
+
+After we create our Bullet and add it to our group we finally want to draw it on our screen and this is once again when the parent class that we inherited from will come into play. The sprite parent class from pygame comes with a .draw method that takes ALL the sprites in its group and draws it onto our screen. The only argument it takes is the surface we want to add it to but remember that placement is important. Think of all our surfaces almost like layers. We have our display layer which is our base, on top of the display we want to have our background. We cant place our hero before our background because it will lay over it and not show. so the order of how we lay stuff down goes as follows : display -> space layer -> ship -> bullet
+
+	self.screen.blit(self.space_surface, (0,0))
+	self.space_surface.blit(pygame.image.load("OuterSpace.png"),(0,0))
+
+	self.hero.draw(self.space_surface)
+
+	self.all_bullets.draw(self.space_surface)   
+
+We can now see our bullet. But no matter how many times we click to shoot it only shows one? Well thats because every single sprite is being drawn at the same location. But we want them to move across the screen the moment its fired. Well our sprite parent class has a method for that too and its called "update()"!. This really doesnt do much for us so we want to overrride it and give it some unique functionality that only belongs to a bullet. This is called POLYMORPHISM!
+
+We can take original methods that we received from our parent and morph it into something new that we as children can use.
+
+Within the Bullet class define the update method to override it:
+
+	def update(self):
+ 		self.rect.y -= 5
+
+Now within our Game loop in out main.py, every time it runs our loop i want to call the update method
+
+ 	#calls our update method on EVERY BULLET OBJECT within our SPRITE GROUP
+        self.all_bullets.update()
+        self.all_bullets.draw(self.space_surface)   
+
+But what happens to the bullet after the screen? Well nothing. It keeps moving off the screen infinitely and that isn't too good for performance. Well once again thanks to inheritance we also have a method that deletes our sprite and this is the .kill() method
+
+
+	#within the Bullet class in the update condition
+	def update(self):
+		self.rect.y -= 10
+		if self.rect.y == 10:
+			self.kill()
