@@ -435,3 +435,45 @@ We want to see if our bullets actually hit our targets or not. To do that, withi
 		if self.rect.y == -50:
 		    self.kill()
 	
+Okay so that takes care of destroying the enemy but now we need a way to lose. Well it turns out we can use the same spritecollide method but with just or SpaceShip object.
+
+Within the game loop we should check if our hero has made contact with any aliens. If so we want to stop the game
+
+	self.hero.draw(self.space_surface)
+	
+	self.all_aliens.draw(self.space_surface)
+	self.all_aliens.update()
+	
+	self.all_bullets.update(self.all_aliens)
+	self.all_bullets.draw(self.space_surface)
+
+ 	# Adding this line will close our game if our hero collides with the aliens
+	if pygame.sprite.spritecollide(self.hero, self.all_aliens, False):
+		pygame.quit()
+		sys.exit()
+
+**CONGRATULATIONS! YOUVE COMPLETED YOUR FIRST GAME!!**
+
+Now obviously this isn't the best game off the block. It definitely needs improvements. We wouldn't want our game to close down every time we lost and had to restart it. We could also use a game window, a way to win, maybe a way to keep score, and if possible maybe some health packs or power ups. If you've made it up to this point you now have everything you need to replicate your own game or make improvements to this one. For some additional practice try out the exercises below
+
+**EXERCISE 1**
+
+Add a feature that allows the enemy class to attack our player. Ensure that each instane of the enemy can attack, create an event for it, and add some collisions to their attack to hurt us. Feel free to add your own images or just create another shape like our bullet but change its color.
+
+**EXERCISE 2**
+
+Add a Scoreboard. Pygame has methods that allow you to write on the screen and even keep count. Attempt to increase your score count every time you destroy one of the enemy. Pygame comes with default fonts or you can download some of your own. 
+
+**EXERCISE 3**
+
+Add music and sound effects to our classes. The game doesn't really have much of a mood and seems kind of dull. You can even attempt to make a death screen and a death sound animation
+
+**EXERCISE 4**
+
+Give our player more lives. Up to this point if we get hit once our animation window closes up and thats no fun. Allow the player to be able to have a couple more chances if he messed up. It would also be nice to be able to see what our lives counter looks like. 
+
+**EXERCISE 5**
+
+Are the enemies too slow? Do you not attack fast enough. Add a powerup that spawns randomly around the game at random times and random locatios that can either increase you movement speed or attack speed temporarily or even slow the enemies movements for some time to allow for easier kills.
+
+ 
