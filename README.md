@@ -456,6 +456,8 @@ Within the game loop we should check if our hero has made contact with any alien
 
 Now obviously this isn't the best game off the block. It definitely needs improvements. We wouldn't want our game to close down every time we lost and had to restart it. We could also use a game window, a way to win, maybe a way to keep score, and if possible maybe some health packs or power ups. If you've made it up to this point you now have everything you need to replicate your own game or make improvements to this one. For some additional practice try out the exercises below
 
+EXERCISE 1
+
 Add a feature that allows the enemy class to attack our player. Ensure that each instance of the enemy can attack, create an event for it, and add some collisions to their attack to hurt us. Feel free to add your own images or just create another shape like our bullet but change its color.
 
 EXERCISE 2
